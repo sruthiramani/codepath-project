@@ -1,2 +1,1 @@
 # codepath
-codepath projects
