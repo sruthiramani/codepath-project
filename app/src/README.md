@@ -24,7 +24,7 @@ GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
 ## Notes
 
-
+Spent more time in figuring out git branches and process.
 
 ## License
 
