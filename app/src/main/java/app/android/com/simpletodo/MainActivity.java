@@ -75,42 +75,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-/*
-    public void onAddItem(View v) {
-
-        EditText etNewItem = (EditText)findViewById(R.id.etNewItem);
-        ToDoItem item = null;
-        if(item != null) {
-            items.add(item);
-           writeItems();
-            etNewItem.setText("");
-        } else {
-            Toast.makeText(this, "Empty to-do item not added to the list", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void readItems() {
-        File filesDir = getFilesDir();
-        File todoFile = new File(filesDir, "todo.txt");
-        try {
-            items = new ArrayList<String>(FileUtils.readLines(todoFile));
-        }
-        catch (IOException e) {
-            items = new ArrayList<String>();
-        }
-    }
-    private  void  writeItems() {
-        File filesDir = getFilesDir();
-        File todoFile = new File(filesDir, "todo.txt");
-        try {
-            Log.d("App", "Writing");
-            FileUtils.writeLines(todoFile, items);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    */
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
