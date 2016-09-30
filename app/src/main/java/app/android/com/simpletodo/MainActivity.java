@@ -16,57 +16,79 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private static final int REQUEST_EDIT_ITEM = 1;
-    ArrayList<String> items;
-    ArrayAdapter<String> itemsAdapter;
+    public static final int REQUEST_EDIT_ITEM = 2;
+    public static final int REQUEST_ADD_ITEM = 1;
+    ArrayList<ToDoItem> items;
+    CustomTodoListAdapter itemsAdapter;
     ListView lvItems;
+    public static ToDoItemDBStore todoDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        todoDB = new ToDoItemDBStore(this);
+        setupListView();
+       setupListViewListener();
+
+    }
+
+    private void setupListView() {
+
         lvItems = (ListView)findViewById(R.id.lvItems);
-        readItems();
-        itemsAdapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1, items);
+        items = todoDB.getToDoItems();
+        itemsAdapter = new CustomTodoListAdapter(getBaseContext(), R.layout.todo_item, items);
         lvItems.setAdapter(itemsAdapter);
-        setupListViewListener();
+
     }
 
     private void setupListViewListener() {
         lvItems.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.d("App", "Long press detected");
+                ToDoItem removedItem = items.get(position);
                 items.remove(position);
                 itemsAdapter.notifyDataSetChanged();
-                writeItems();
+                todoDB.deleteToDoItem(removedItem.getId());
                 return true;
             }
         });
         lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent editIntent = new Intent(MainActivity.this, EditItemActivity.class);
-                editIntent.putExtra("position", position);
-                editIntent.putExtra("value", items.get(position));
+                Log.d("App", "click detected");
+               // Intent editIntent = new Intent(MainActivity.this, EditItemActivity.class);
+                Intent editIntent = new Intent(MainActivity.this, NewToDoItem.class);
+                editIntent.putExtra("id", items.get(position).getId());
+                editIntent.putExtra("request-code", REQUEST_EDIT_ITEM);
                 startActivityForResult(editIntent, REQUEST_EDIT_ITEM);
             }
         });
     }
+    public void onAddTodoItem(View v) {
+        Intent newToDoIntent = new Intent(this, NewToDoItem.class);
+        startActivityForResult(newToDoIntent, REQUEST_ADD_ITEM);
 
+    }
+
+/*
     public void onAddItem(View v) {
+
         EditText etNewItem = (EditText)findViewById(R.id.etNewItem);
-        String item = etNewItem.getText().toString();
-        if(!item.isEmpty()) {
+        ToDoItem item = null;
+        if(item != null) {
             items.add(item);
-            writeItems();
+           writeItems();
             etNewItem.setText("");
         } else {
             Toast.makeText(this, "Empty to-do item not added to the list", Toast.LENGTH_SHORT).show();
         }
-
     }
+
     private void readItems() {
         File filesDir = getFilesDir();
         File todoFile = new File(filesDir, "todo.txt");
@@ -88,18 +110,29 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+    */
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == REQUEST_EDIT_ITEM) {
+            Log.d("App", "received edited values 1");
             if (resultCode == RESULT_OK) {
-                int position = data.getIntExtra("position", 0);
-                String value = data.getStringExtra("edited-value");
-                items.set(position, value);
-                writeItems();
+                Log.d("App", "received edited values");
                 itemsAdapter.notifyDataSetChanged();
             } else if( resultCode == RESULT_CANCELED) {
                 Toast.makeText(this, "Empty text not updated in to-do item", Toast.LENGTH_SHORT).show();
+            }
+        } else if(requestCode == REQUEST_ADD_ITEM) {
+            if(resultCode == RESULT_OK) {
+                String title = data.getStringExtra("Title");
+                String desc = data.getStringExtra("Desc");
+                int priority = data.getIntExtra("Priority", 0);
+                String date = data.getStringExtra("date");
+                Log.d("date",date);
+                long id = todoDB.insertToDoItem(title, desc, priority, false, date);
+                ToDoItem item1 = new ToDoItem(id,title, desc,false,priority,date);
+                items.add(item1);
+                itemsAdapter.notifyDataSetChanged();
             }
         }
     }
